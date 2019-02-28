@@ -29,6 +29,10 @@ public class TimelineActivity extends AppCompatActivity {
     private TweetAdaptor adapt;
     private List<Tweet> tweets;
     private SwipeRefreshLayout swipeContainer;
+    private EndlessRecyclerViewScrollListener scrollListener;
+    private LinearLayoutManager layoutManager;
+    private long lowestTID = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +55,53 @@ public class TimelineActivity extends AppCompatActivity {
         tweets = new ArrayList<>();
         adapt = new TweetAdaptor(this,tweets);
 
-        rcTweets.setLayoutManager(new LinearLayoutManager(this));
+
+        layoutManager = new LinearLayoutManager(this);
+        rcTweets.setLayoutManager(layoutManager);
         rcTweets.setAdapter(adapt);
 
+        scrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                populatenextpageofscroll();
+            }
+        };
+
+        rcTweets.addOnScrollListener(scrollListener);
         populateHomeTimeline();
     }
 
 
+    private void populatenextpageofscroll()
+    {
+        Toast.makeText(this, "WE did it", Toast.LENGTH_LONG).show();
+        client.getNextPageOfTweets(new JsonHttpResponseHandler() {
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONArray response) {
+                super.onSuccess(statusCode, headers, response);
+
+                List<Tweet> tweestsToAdd = new ArrayList<>();
+                for (int i = 0; i < response.length(); i++)
+                {
+                    try
+                    {
+                        JSONObject jsonTweet = response.getJSONObject(i);
+                        tweestsToAdd.add(Tweet.fromJson(jsonTweet));
+
+                        //adapt.notifyItemInserted(tweets.size() - 1);
+                    }
+                    catch (JSONException e)
+                    {
+                        Toast.makeText(getBaseContext(), "we fucked up", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                lowestTID = getLowestTID(tweestsToAdd, lowestTID);
+                adapt.addAll(tweestsToAdd);
+            }
+        }, lowestTID);
+
+    }
 
     private void populateHomeTimeline() {
         client.getHomeTimeLine(new JsonHttpResponseHandler()
@@ -74,6 +118,7 @@ public class TimelineActivity extends AppCompatActivity {
                     {
                         JSONObject jsonTweet = response.getJSONObject(i);
                         tweestsToAdd.add(Tweet.fromJson(jsonTweet));
+                        
                         //adapt.notifyItemInserted(tweets.size() - 1);
                     }
                     catch (JSONException e)
@@ -81,6 +126,7 @@ public class TimelineActivity extends AppCompatActivity {
                         Toast.makeText(getBaseContext(), "we fucked up", Toast.LENGTH_SHORT).show();
                     }
                 }
+                lowestTID = getLowestTID(tweestsToAdd, lowestTID);
                 adapt.clear();
                 adapt.addAll(tweestsToAdd);
                 swipeContainer.setRefreshing(false);
@@ -96,5 +142,32 @@ public class TimelineActivity extends AppCompatActivity {
                 super.onFailure(statusCode, headers, responseString, throwable);
             }
         });
+
+
     }
+
+    private long getLowestTID(List<Tweet> tweets, long curLowest)
+    {
+
+        long newlow;
+
+        if (curLowest == 0)
+        {
+            newlow = tweets.get(0).id;
+        } else
+        {
+            newlow = curLowest;
+        }
+
+
+        for (Tweet t : tweets)
+        {
+            if (t.id < newlow)
+            {
+                newlow = t.id;
+            }
+        }
+        return newlow;
+    }
+
 }
