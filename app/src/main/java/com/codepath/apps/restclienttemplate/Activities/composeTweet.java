@@ -36,7 +36,6 @@ public class composeTweet extends AppCompatActivity {
 
         btnTweet = findViewById(R.id.btnSubmit);
         mltvCompose = findViewById(R.id.tvTweet);
-        tvCharRem = findViewById(R.id.tvRemChar);
         client = TwitterApp.getRestClient(this);
 
 
