@@ -2,11 +2,18 @@ package com.codepath.apps.restclienttemplate.models;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
+@Parcel
 public class Tweet {
     public String body, Created;
     public long id;
     public User user;
+
+
+
+    public Tweet()
+    {}
 
 
     public static Tweet fromJson(JSONObject Jsontweet) throws JSONException

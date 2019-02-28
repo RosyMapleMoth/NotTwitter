@@ -3,6 +3,7 @@ package com.codepath.apps.restclienttemplate.Activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -23,6 +24,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,8 @@ import cz.msebera.android.httpclient.Header;
 
 public class TimelineActivity extends AppCompatActivity {
 
+
+    private static final int TWEET_CODE = 25;
 
     private TwitterClient client;
     private RecyclerView rcTweets;
@@ -123,11 +127,23 @@ public class TimelineActivity extends AppCompatActivity {
         if(item.getItemId() == R.id.compose)
         {
             Intent i = new Intent(this, composeTweet.class);
-            startActivity(i);
+            startActivityForResult(i, TWEET_CODE);
 
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == TWEET_CODE && resultCode == RESULT_OK)
+        {
+            Tweet newUserTweet = Parcels.unwrap(data.getParcelableExtra("tweet"));
+            tweets.add(0,newUserTweet);
+            adapt.notifyItemInserted(0);
+        }
+
     }
 
     private void populateHomeTimeline() {
