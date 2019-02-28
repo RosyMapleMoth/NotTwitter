@@ -2,6 +2,8 @@
 
 **NotTwitter** is an android app that allows a user to view his Twitter timeline. The app utilizes [Twitter REST API](https://dev.twitter.com/rest/public).
 
+as a notice i have left a lot of things un checked that i plan to revisit over the coming month
+
 Time spent: **8-9** hours spent in total
 
 ## User Stories
