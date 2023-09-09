@@ -1,3 +1,5 @@
+This is a submission as a part of a class project for CodePath's Intermediate Android class 2019
+
 # Project 2 - NotTwitter
 
 **NotTwitter** is an android app that allows a user to view his Twitter timeline. The app utilizes [Twitter REST API](https://dev.twitter.com/rest/public).
